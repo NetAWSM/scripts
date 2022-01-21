@@ -1,8 +1,8 @@
 import os
 
 
-path = "C:\Python\ect"
-ex = ".txt"
+path = "C:\\Users\\irina.zarubina\\Desktop\\ed"
+ex = ".pdf"
 
 if os.path.exists(path):
   if os.path.isdir(path):
