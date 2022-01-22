@@ -7,8 +7,8 @@ ex = ".pdf"
 
 for root, dirs, files in os.walk("C:\\users"):
   if '\send mail' in root:
-      aa = root
-      path.append(aa)
+      mass = root
+      path.append(mass)
 
 try:
   for i in path:
