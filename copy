@@ -1,0 +1,15 @@
+DIR="/opt/pictrs/"
+server=""
+
+
+find $DIR -type f -name *.jpg > list.txt
+
+for i in $(find  $DIR -type f -name *.jpg);
+  do
+    cp $i .;
+done
+
+tar -czvf ./alljpg.tar.gz ./*.jpg
+
+#scp alljpg.tar.gz net@192.168.118.137:/tmp/
+#scp list.txt net@192.168.118.137:/tmp/
