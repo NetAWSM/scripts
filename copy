@@ -1,15 +1,31 @@
-DIR="/opt/pictrs/"
-server=""
+DIR="/opt/copy/"   # Директория на удаленном сервере
+server="172.21.2.25" # адрес удаленного сервера
+user="net"
+BDATE=$(date +\%d-\%m-\%y:%H:%M)
+
+get_files() {
 
 
-find $DIR -type f -name *.jpg > list.txt
+find $DIR -type f -name *.jpg > $BDATE/list.txt
 
-for i in $(find  $DIR -type f -name *.jpg);
+for i in $(cat $BDATE/list.txt);
   do
-    cp $i .;
+    cp $i $BDATE
 done
 
-tar -czvf ./alljpg.tar.gz ./*.jpg
+}
 
-#scp alljpg.tar.gz net@192.168.118.137:/tmp/
-#scp list.txt net@192.168.118.137:/tmp/
+
+main() {
+
+
+mkdir $BDATE
+get_files
+scp -r ./$BDATE $user@$server:/tmp/
+cp /opt/copy/* /opt/bk/ -R
+rm -rf $DIR/*
+rm -rf $BDATE
+
+}
+
+main
