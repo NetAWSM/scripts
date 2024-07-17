@@ -1,31 +1,56 @@
 DIR="/opt/copy/"   # Директория на удаленном сервере
-server="172.21.2.25" # адрес удаленного сервера
+server="91.224.86.112" # адрес удаленного сервера
 user="net"
-BDATE=$(date +\%d-\%m-\%y:%H:%M)
+BDATE=$(date +\%d-\%m-\%y:%H)
+count=1
 
 get_files() {
 
-
-find $DIR -type f -name *.jpg > $BDATE/list.txt
+ssh $user@$server "find $DIR -type f -name *.jpg | sort" > $BDATE/list.txt
 
 for i in $(cat $BDATE/list.txt);
   do
-    cp $i $BDATE
+    scp $user@$server:$i $DIR
 done
+
+}
+
+comparison() {
+
+find $DIR -type f -name *.jpg | sort > $BDATE/dmz_list.txt
+
+if [ $(diff -q $BDATE/dmz_list.txt $BDATE/list.txt | awk '{print$5}') == "differ" ]
+  then
+    echo $(date +\%d-\%m-\%y:%H:%M) "Файлы успешно скопированы" >> log
+else
+    echo "Ошибка копирования файлов" >> log
+fi
 
 }
 
 
 main() {
 
-
 mkdir $BDATE
 get_files
-scp -r ./$BDATE $user@$server:/tmp/
-cp /opt/copy/* /opt/bk/ -R
-rm -rf $DIR/*
-rm -rf $BDATE
+ssh $user@$server "rm -rf $DIR/*"
+comparison
 
 }
 
+while [ $count -lt 10 ]
+  do
+    if nc -z $server 22 2>/dev/null
+      then
+        echo $(date +\%d-\%m-\%y:%H:%M) "Соединение установлено" >> log
+        break
+    fi
+    sleep 3
+    echo $(date +\%d-\%m-\%y:%H:%M) "Сервер не доступен. Попытка соединения $count..." >> log
+    ((count++))
+  done
 main
+
+
+
+
