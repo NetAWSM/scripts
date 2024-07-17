@@ -6,20 +6,20 @@ count=1
 
 get_files() {
 
-ssh $user@$server "find $DIR -type f -name *.jpg | sort" > $BDATE/list.txt
+ssh $user@$server "find $DIR -type f -name *.jpg | sort" > list.txt
 
-for i in $(cat $BDATE/list.txt);
+for i in $(cat list.txt);
   do
-    scp $user@$server:$i $DIR
+    scp $user@$server:$i $DIR/$BDATE
 done
 
 }
 
 comparison() {
 
-find $DIR -type f -name *.jpg | sort > $BDATE/dmz_list.txt
+find $DIR/$BDATE -type f -name *.jpg | sort > dmz_list.txt
 
-if [ $(diff -q $BDATE/dmz_list.txt $BDATE/list.txt | awk '{print$5}') == "differ" ]
+if [ $(diff -q dmz_list.txt list.txt | awk '{print$5}') == "differ" ]
   then
     echo $(date +\%d-\%m-\%y:%H:%M) "Файлы успешно скопированы" >> log
 else
@@ -31,12 +31,12 @@ fi
 
 main() {
 
-mkdir $BDATE
+mkdir $DIR/$BDATE
 get_files
 ssh $user@$server "rm -rf $DIR/*"
 comparison
-rm -f $BDATE/list.txt
-rm -f $BDATE/dmz_list.txt
+rm -f dmz_list.txt
+rm -f list.txt
 
 }
 
@@ -52,8 +52,4 @@ while [ $count -lt 10 ]
     echo $(date +\%d-\%m-\%y:%H:%M) "Сервер не доступен. Попытка соединения $count..." >> log
     ((count++))
   done
-
-
-
-
 
