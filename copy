@@ -35,6 +35,8 @@ mkdir $BDATE
 get_files
 ssh $user@$server "rm -rf $DIR/*"
 comparison
+rm -f $BDATE/list.txt
+rm -f $BDATE/dmz_list.txt
 
 }
 
