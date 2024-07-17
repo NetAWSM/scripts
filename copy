@@ -43,13 +43,14 @@ while [ $count -lt 10 ]
     if nc -z $server 22 2>/dev/null
       then
         echo $(date +\%d-\%m-\%y:%H:%M) "Соединение установлено" >> log
+        main
         break
     fi
     sleep 3
     echo $(date +\%d-\%m-\%y:%H:%M) "Сервер не доступен. Попытка соединения $count..." >> log
     ((count++))
   done
-main
+
 
 
 
