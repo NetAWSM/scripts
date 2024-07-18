@@ -6,7 +6,7 @@ count=1
 
 get_files() {
 
-ssh $user@$server "find $DIR -type f -name *.jpg | sort" > list.txt
+ssh $user@$server "find $DIR -type f -name *.jpg | sort | sha256sum $i | awk '{print$1}'" > list.txt
 
 for i in $(cat list.txt);
   do
@@ -53,3 +53,4 @@ while [ $count -lt 10 ]
     ((count++))
   done
 
+#ssh $user@$server "for i in $(find /opt/copy -type f -name *.jpg); do sha256sum $i | sort | awk -F/ '{gsub(/[ \t]+/, ""); print$1":"$5}'; done"
