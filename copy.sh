@@ -1,12 +1,12 @@
 DIR="/opt/copy/"   # Директория на удаленном сервере
 server="91.224.86.112" # адрес удаленного сервера
-user="net"
+user="net" # Пользовтель для подключения
 BDATE=$(date +\%d-\%m-\%y:%H)
 count=1
 
 get_files() {
 
-ssh $user@$server 'for i in $(find /opt/copy -type f -name *.jpg); do sha256sum $i; done' > temp
+ssh $user@$server 'for i in $(find /opt/copy -type f -name *.jpg); do sha256sum $i; done' > temp  #$после find надо вписать путь из DIR, сам DIR почему то не работает
 if [ -s temp ] 
   then
     mkdir $DIR/$BDATE
@@ -21,14 +21,17 @@ for i in $(cat temp | awk '{print$2}');
     scp $user@$server:$i $DIR/$BDATE
 done
 cat temp | awk '{print$1}' > list
+cat temp | awk '{print$2}' > temp_list
 rm -f temp
+
 
 }
 
 comparison() {
 
-for i in $(find $DIR/$BDATE -type f -name *.jpg); do sha256sum $i; done | sort > temp
+for i in $(find $DIR/$BDATE -type f -name *.jpg); do sha256sum $i; done | sort > temp  #sort не работает
 cat temp | awk '{print$1}' > dmz_list
+cat temp | awk '{print$2}' > temp_dmz_list
 rm -f temp
 
 if [[ $(diff -s dmz_list list | awk '{print$6}') == "identical" ]]
@@ -36,8 +39,8 @@ if [[ $(diff -s dmz_list list | awk '{print$6}') == "identical" ]]
     echo $(date +\%d-\%m-\%y:%H:%M) "Файлы успешно скопированы" >> log
 else
     echo $(date +\%d-\%m-\%y:%H:%M) "Ошибка копирования файлов" >> log
-    rm -rf $DIR/$BDATE
-    #Проверку какие именно файлы не скопированы
+    rm -rf $DIR/$BDATE # Если ошибка копирования, то надо удалить и скрипт перезапустить
+    diff temp_list temp_dmz_list >> log # отформатировать лог
 fi
 
 rm -f dmz_list
