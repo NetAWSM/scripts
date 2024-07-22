@@ -7,7 +7,7 @@ count=1
 get_files() {
 
 ssh $user@$server 'for i in $(find /opt/copy -type f -name *.jpg); do sha256sum $i; done' > temp  #$после find надо вписать путь из DIR, сам DIR почему то не работает
-if [ -s temp ] 
+if [ -s temp ]
   then
     mkdir $DIR/$BDATE
 else
