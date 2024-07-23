@@ -2,7 +2,6 @@ DIR="/opt/copy/"   # Директория на удаленном сервере
 server="s001dev-nss01" # адрес удаленного сервера
 user="net" # Пользовтель для подключения
 BDATE=$(date +\%d-\%m-\%y:%H)
-log=$(date +\%d-\%m-\%y:%H:%M:%S)
 fail=1
 count=1
 
@@ -14,7 +13,7 @@ if [ -s temp ]
   then
     mkdir $DIR/$BDATE
 else
-  echo $log "Новых файлов для передачи не найдено" >> log
+  echo $(date +\%d-\%m-\%y:%H:%M:%S) "Новых файлов для передачи не найдено" >> log
   rm -f temp
   exit
 fi
@@ -40,12 +39,12 @@ rm -f temp
 
 if [[ $(diff -s dmz_list list | awk '{print$6}') == "identical" ]]
   then
-    echo $log "Файлы успешно скопированы" >> log
-    ssh $user@$server "rm -rf $DIR/*"
+    echo $(date +\%d-\%m-\%y:%H:%M:%S) "Файлы успешно скопированы" >> log
+    ssh $user@$server "rm -rf $DIR/*"  #Ошибку при удалении в лог
 else
-    echo $log "Ошибка копирования файлов. Попытка перезапуска $fail" >> log
+    echo $(date +\%d-\%m-\%y:%H:%M:%S) "Ошибка копирования файлов. Попытка перезапуска $fail" >> log
     ((fail++))
-    rm -rf $DIR/$BDATE
+    rm -rf $DIR/$BDATE # Ошибку при удалении в лог
     if [ $fail -gt 3 ]
       then
         echo $(date +\%d-\%m-\%y:%H:%M:%S) "Выполнение программы завершено с ошибкой." >> log
@@ -66,10 +65,10 @@ while :
   do
     if nc -z $server 22 2>/dev/null
       then
-        echo $log "Соединение установлено" >> log
+        echo $(date +\%d-\%m-\%y:%H:%M:%S) "Соединение установлено" >> log
         break
     fi
-    echo $log "Сервер не доступен. Попытка соединения $count..." >> log
+    echo $(date +\%d-\%m-\%y:%H:%M:%S) "Сервер не доступен. Попытка соединения $count..." >> log
     ((count++))
     if [ $count -gt 10 ]
       then
@@ -82,9 +81,9 @@ done
 
 if ssh -o stricthostkeychecking=no -o userknownhostsfile=/dev/null -o passwordauthentication=no $user@$server : 2>/dev/null
   then
-    echo $log "Доступ разрешен" >> log
+    echo $(date +\%d-\%m-\%y:%H:%M:%S) "Доступ разрешен" >> log
   else
-    echo $log "Доступ пользователя $user запрещен" >> log
+    echo $(date +\%d-\%m-\%y:%H:%M:%S) "Доступ пользователя $user запрещен" >> log
     exit
 fi
 
