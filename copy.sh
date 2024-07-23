@@ -3,7 +3,9 @@ server="s001dev-nss01" # адрес удаленного сервера
 user="net" # Пользовтель для подключения
 BDATE=$(date +\%d-\%m-\%y:%H)
 log=$(date +\%d-\%m-\%y:%H:%M:%S)
+fail=1
 count=1
+
 
 get_files() {
 
@@ -20,6 +22,7 @@ fi
 for i in $(cat temp | awk '{print$2}');
   do
     scp $user@$server:$i $DIR/$BDATE
+    sleep 2
 done
 cat temp | awk '{print$1}' > list
 cat temp | awk '{print$2}' > temp_list
@@ -38,11 +41,18 @@ rm -f temp
 if [[ $(diff -s dmz_list list | awk '{print$6}') == "identical" ]]
   then
     echo $log "Файлы успешно скопированы" >> log
+    ssh $user@$server "rm -rf $DIR/*"
 else
-    echo $log "Ошибка копирования файлов" >> log
-    rm -rf $DIR/$BDATE # Если ошибка копирования, то надо удалить и скрипт перезапустить
-    diff -q temp_list temp_dmz_list >> log # отформатировать лог
-    #main
+    echo $log "Ошибка копирования файлов. Попытка перезапуска $fail" >> log
+    ((fail++))
+    rm -rf $DIR/$BDATE
+    if [ $fail -gt 3 ]
+      then
+        echo $(date +\%d-\%m-\%y:%H:%M:%S) "Выполнение программы завершено с ошибкой." >> log
+        exit
+    fi
+    #diff -q temp_list temp_dmz_list >> log # отформатировать лог
+    main
 fi
 
 rm -f dmz_list list temp_list temp_dmz_list
@@ -85,7 +95,6 @@ main() {
 
 check
 get_files
-ssh $user@$server "rm -rf $DIR/*"
 comparison
 
 }
